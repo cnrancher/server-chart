@@ -9,9 +9,15 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   ports:
-  - port: 80
+  - name: http
+    port: 80
     targetPort: 80
     protocol: TCP
-    name: http
+  {{- if eq .Values.service.type "NodePort" }}
+    nodePort: {{ .Values.service.ports.nodePort }}
+  {{- end }}
   selector:
     app: {{ template "rancher.fullname" . }}
+{{- if eq .Values.service.type "NodePort" }}
+  type: {{ .Values.service.type }}
+{{- end }}
