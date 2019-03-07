@@ -8,7 +8,7 @@ pipeline:
       - /var/run/docker.sock:/var/run/docker.sock
     when:
       ref:
-        exclude: [ regs/tags/*stable* ]
+        exclude: [ refs/tags/*stable* ]
 
   promote_stable:
     image: rancher/dapper:1.11.2
@@ -17,10 +17,26 @@ pipeline:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     when:
-      branch: master
+      branch: release/*
       event: tag
       ref:
-        include: [ regs/tags/*stable* ]
+        include: [ refs/tags/*stable* ]
+
+  publish-alpha:
+    image: plugins/gcs
+    source: charts/alpha
+    target: releases.rancher.com/server-charts/alpha
+    acl:
+      - allUsers:READER
+    cache_control: public,max-age=3600
+    secrets:
+      - source: google_auth_key
+        target: GOOGLE_CREDENTIALS
+    when:
+      branch: [master, release/*]
+      event: tag
+      ref:
+        include: [ refs/tags/*alpha* ]
 
   publish-latest:
     image: plugins/gcs
@@ -33,10 +49,10 @@ pipeline:
       - source: google_auth_key
         target: GOOGLE_CREDENTIALS
     when:
-      branch: master
+      branch: release/*
       event: tag
       ref:
-        exclude: [ regs/tags/*stable* ]
+        exclude: [ refs/tags/*stable*, refs/tags/*alpha* ]
 
   publish-stable:
     image: plugins/gcs
@@ -49,7 +65,7 @@ pipeline:
       - source: google_auth_key
         target: GOOGLE_CREDENTIALS
     when:
-      branch: master
+      branch: release/*
       event: tag
       ref:
-        include: [ regs/tags/*stable* ]
+        include: [ refs/tags/*stable* ]
