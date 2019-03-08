@@ -59,3 +59,11 @@ helm install  --kubeconfig=kube_config_xxx.yml \
 NAME                      CHART VERSION    APP VERSION    DESCRIPTION
 rancher-stable/rancher    2018.3.1           v2.1.7      Install Rancher Server to manage Kubernetes clusters acro...
 ```
+
+{% mermaid %}
+graph TD;
+  A-->B;
+  A-->C;
+  B-->D;
+  C-->D;
+{% endmermaid %}
