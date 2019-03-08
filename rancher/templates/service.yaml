@@ -32,5 +32,5 @@ spec:
   selector:
     app: {{ template "rancher.fullname" . }}
 {{- if eq .Values.service.type "NodePort" }}
-  type: {{ .Values.service.type }}
+  type: NodePort
 {{- end }}
