@@ -9,13 +9,26 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   ports:
-  - name: http
+{{- if eq .Values.service.type "NodePort" }}
+  {{- if eq .Values.tls "external" }}
+  - name: http-80
     port: 80
     targetPort: 80
     protocol: TCP
-  {{- if eq .Values.service.type "NodePort" }}
+    nodePort: {{ .Values.service.ports.nodePort }}
+  {{- else }}
+  - name: https-443
+    port: 443
+    targetPort: 443
+    protocol: TCP
     nodePort: {{ .Values.service.ports.nodePort }}
   {{- end }}
+{{- else }}
+  - name: http-80
+    port: 80
+    targetPort: 80
+    protocol: TCP
+{{- end }}
   selector:
     app: {{ template "rancher.fullname" . }}
 {{- if eq .Values.service.type "NodePort" }}
