@@ -40,9 +40,10 @@ cp ${CN}.key tls.key
 cp ${CN}.crt tls.crt
 
 # 把生成的证书作为密文导入K8S
-## 指定K8S配置文件
+## *指定K8S配置文件路径
 
 kubeconfig=
+
 kubectl --kubeconfig=$kubeconfig create namespace cattle-system
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret tls tls-rancher-ingress --cert=./tls.crt --key=./tls.key
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret generic tls-ca --from-file=cacerts.pem
