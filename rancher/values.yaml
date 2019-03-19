@@ -81,7 +81,7 @@ resources: {}
 tls: ingress
 
 service:
-  type: 
+  type: ClusterIP
   ports:
     nodePort: 30303
   
