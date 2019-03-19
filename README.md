@@ -10,6 +10,8 @@
 
 ### 1、内部ingress域名访问
 
+通过集群内安装的ingress服务，使用七层域名转发来访问rancher server，请求流量将转发到rancher server容器的`80`端口。
+
 - 把服务证书和CA证书作为密文导入K8S
 
 > 指定K8S配置文件路径 \
@@ -21,7 +23,7 @@ kubectl --kubeconfig=$kubeconfig -n cattle-system create secret tls tls-rancher-
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret generic tls-ca --from-file=cacerts.pem
 ```
 
-- 通过集群内安装的ingress服务，使用七层域名转发来访问rancher server，请求流量将转发到rancher server容器的`80`端口。
+- 安装
 
 ```bash
 git clone -b v2.1.7 https://github.com/xiaoluhong/server-chart.git
