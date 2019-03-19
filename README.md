@@ -18,6 +18,7 @@ helm install  --kubeconfig=kube_config_xxx.yml \
   --name rancher \
   --namespace cattle-system \
   --set hostname=<修改为自己的域名> \
+  --set service.type=ClusterIP \
   --set ingress.tls.source=secret \
   server-chart/rancher
 ```
