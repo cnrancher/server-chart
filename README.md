@@ -3,7 +3,19 @@
 本Chart基于 https://github.com/rancher/server-chart 修改，不支持LetsEncrypt、cert-manager提供证书，需手动通过Secret导入证书(导入方法见脚本结尾), 默认开启审计日志功能.
 ## 自签名证书或权威认证证书
 
-仓库根目录有一键创建自签名证书脚本，会自动创建`cacerts.pem`、`tls.key`、`tls.crt`。如果使用权威认证证书，需要重命名crt和key为`tls.crt`和`tls.key`。
+- 仓库根目录有一键创建自签名证书脚本，会自动创建`cacerts.pem`、`tls.key`、`tls.crt`。
+- 如果使用权威认证证书，需要重命名crt和key为`tls.crt`和`tls.key`。
+
+## 把生成的证书作为密文导入K8S
+
+> 指定K8S配置文件路径
+kubeconfig=
+
+```
+kubectl --kubeconfig=$kubeconfig create namespace cattle-system
+kubectl --kubeconfig=$kubeconfig -n cattle-system create secret tls tls-rancher-ingress --cert=./tls.crt --key=./tls.key
+kubectl --kubeconfig=$kubeconfig -n cattle-system create secret generic tls-ca --from-file=cacerts.pem
+```
 
 ## 部署架构
 
