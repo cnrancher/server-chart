@@ -10,7 +10,7 @@
 
 ### 1、内部ingress域名访问
 
-- 把证书作为密文导入K8S
+- 把服务证书和CA证书作为密文导入K8S
 
 > 指定K8S配置文件路径 \
 kubeconfig=
@@ -45,7 +45,7 @@ helm install  --kubeconfig=kube_config_xxx.yml \
 
 有的场景需要使用IP去直接访问rancher server, 因为ingress默认不支持IP访问，所以这里禁用ingress。通过NodePort把rancher server容器端口映射到宿主机的端口上，这个时候rancher server容器作为ssl终止，请求流量转发到rancher server容器的`443`端口。
 
-- 把证书作为密文导入K8S
+- 把服务证书和CA证书作为密文导入K8S
 
 > 指定K8S配置文件路径 \
 kubeconfig=
@@ -80,16 +80,18 @@ helm install  --kubeconfig=kube_config_xxx.yml \
 
 有的场景，外部有七层负载均衡器作为ssl终止，一般使用是把负载均衡器的`443`端口代理到内部服务的`80`端口上。为了保证网络转发性能，这里禁用了内置的ingress服务，以NodePort方式把rancher server容器`80`端口映射到宿主机端口上。外部七层负载均衡器`443`端口直接代理到Rancher的NodePort端口,请求流量转发到rancher server容器的`80`端口。
 
-- 把证书作为密文导入K8S
+- 把服务证书放在外部负载均衡器上，比如nginx；
+
+- 把CA证书作为密文导入K8S
 
 > 指定K8S配置文件路径 \
 kubeconfig=
 
 ```
 kubectl --kubeconfig=$kubeconfig create namespace cattle-system
-kubectl --kubeconfig=$kubeconfig -n cattle-system create secret tls tls-rancher-ingress --cert=./tls.crt --key=./tls.key
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret generic tls-ca --from-file=cacerts.pem
 ```
+
 - 安装
 
 ```bash
