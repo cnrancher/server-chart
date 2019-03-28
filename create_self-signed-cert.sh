@@ -47,3 +47,7 @@ kubeconfig=
 kubectl --kubeconfig=$kubeconfig create namespace cattle-system
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret tls tls-rancher-ingress --cert=./tls.crt --key=./tls.key
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret generic tls-ca --from-file=cacerts.pem
+
+## 执行以下命令删除密文
+
+kubectl -n cattle-system  delete  secrets  tls-rancher-ingress  tls-ca
