@@ -22,8 +22,17 @@ auditLog:
 # Adding the "local" cluster available in the GUI can be convenient, but any user with access to this cluster has "root" on any of the clusters that Rancher manages.
 # options; "auto", "false". (auto pretty much means true)
 addLocal: "auto"
+
+# Image for collecting rancher audit logs.
+busyboxImage: rancher/busybox
+
 # Add debug flag to Rancher server
 debug: false
+
+# Extra environment variables passed to the rancher pods.
+# extraEnv:
+# - name: CATTLE_SYSTEM_DEFAULT_REGISTRY
+#   value: "registry.example.com"
 
 # Fully qualified name to reach your Rancher server
 # hostname: rancher.my.org
@@ -36,7 +45,7 @@ imagePullSecrets: []
 ### ingress ###
 # Readme for details and instruction on adding tls secrets.
 ingress:
-  extraAnnotations:
+  extraAnnotations: 
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
@@ -62,6 +71,7 @@ privateCA: false
 noProxy: 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16 
 
 # Override rancher image location for Air Gap installs
+rancherrRegistry: registry.cn-shanghai.aliyuncs.com
 rancherImage: rancher/rancher
 # rancher/rancher image tag. https://hub.docker.com/r/rancher/rancher/tags/
 # Defaults to .Chart.appVersion
