@@ -47,7 +47,7 @@ spec:
               topologyKey: kubernetes.io/hostname
 {{- end }}
       containers:
-      - image: {{ .Values.rancherImage }}:{{ default .Chart.AppVersion .Values.rancherImageTag }}
+      - image: {{ .Values.rancherRegistry }}/{{ .Values.rancherImage }}:{{ default .Chart.AppVersion .Values.rancherImageTag }}
         name: {{ template "rancher.name" . }}
         ports:
         - containerPort: 80
@@ -58,6 +58,7 @@ spec:
 {{- end }}
 {{- if .Values.privateCA }}
         # Private CA - don't clear ca certs
+{{- else if eq .Values.ingress.tls.source "rancher" }}
         # Rancher self-signed - don't clear ca certs
 {{- else }}
         # Public trusted CA - clear ca certs
@@ -71,6 +72,7 @@ spec:
           value: {{ .Release.Namespace }}
         - name: CATTLE_PEER_SERVICE
           value: {{ template "rancher.fullname" . }}
+{{- if gt .Values.auditLog.level 0.0 }}
         - name: AUDIT_LEVEL
           value: {{ .Values.auditLog.level | quote }}
         - name: AUDIT_LOG_MAXAGE
@@ -79,6 +81,7 @@ spec:
           value: {{ .Values.auditLog.maxBackup | quote }}
         - name: AUDIT_LOG_MAXSIZE
           value: {{ .Values.auditLog.maxSize | quote }}
+{{- end }}
 {{- if .Values.proxy }}
         - name: HTTP_PROXY
           value: {{ .Values.proxy }}
@@ -112,9 +115,10 @@ spec:
           name: tls-ca-volume
           readOnly: true
 {{- end }}
+{{- if gt .Values.auditLog.level 0.0 }}
         - mountPath: /var/log/auditlog
           name: audit-log
-
+{{- end }}
 # 如果类型为NodePort，如果不是外部证书就需要挂载卷
 {{- if eq .Values.service.type "NodePort" }}
   {{- if ne .Values.tls "external" }}
@@ -122,15 +126,16 @@ spec:
           name: tls-cert-key-volume
   {{- end }}
 {{- end }}
-
+{{- if gt .Values.auditLog.level 0.0 }}
       # Make audit logs avalible for Rancher log collecter tools.
-      - image: busybox
+      - image: {{ .Values.rancherRegistry }}/{{ .Values.busyboxImage }}
         name: {{ template "rancher.name" . }}-audit-log
         command: ["tail"]
         args: ["-F", "/var/log/auditlog/rancher-api-audit.log"]
         volumeMounts:
         - mountPath: /var/log/auditlog
           name: audit-log
+{{- end }}
       volumes:
 {{- if .Values.additionalTrustedCAs }}
       - name: tls-ca-additional-volume
@@ -160,7 +165,7 @@ spec:
           defaultMode: 0400
           secretName: tls-ca
 {{- end }}
-
+{{- if gt .Values.auditLog.level 0.0 }}
   {{- if eq .Values.auditLog.destination "hostPath" }}
       - name: audit-log
         hostPath:
@@ -170,4 +175,4 @@ spec:
       - name: audit-log
         emptyDir: {}
   {{- end }}
-
+{{- end }}
