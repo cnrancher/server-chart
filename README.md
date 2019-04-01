@@ -21,6 +21,13 @@ kubeconfig=
 kubectl --kubeconfig=$kubeconfig create namespace cattle-system
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret tls tls-rancher-ingress --cert=./tls.crt --key=./tls.key
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret generic tls-ca --from-file=cacerts.pem
+
+kubectl --kubeconfig=$kubeconfig -n kube-system create serviceaccount tiller
+kubectl --kubeconfig=$kubeconfig create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+
+helm_version=`helm version |grep Client | awk -F""\" '{print $2}'`
+helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller --tiller-image registry.cn-shanghai.aliyuncs.com/rancher/tiller:$helm_version
+
 ```
 
 - 安装
@@ -58,6 +65,13 @@ kubeconfig=
 kubectl --kubeconfig=$kubeconfig create namespace cattle-system
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret tls tls-rancher-ingress --cert=./tls.crt --key=./tls.key
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret generic tls-ca --from-file=cacerts.pem
+
+kubectl --kubeconfig=$kubeconfig -n kube-system create serviceaccount tiller
+kubectl --kubeconfig=$kubeconfig create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+
+helm_version=`helm version |grep Client | awk -F""\" '{print $2}'`
+helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller --tiller-image registry.cn-shanghai.aliyuncs.com/rancher/tiller:$helm_version
+
 ```
 
 - 安装
@@ -97,6 +111,13 @@ kubeconfig=
 ```
 kubectl --kubeconfig=$kubeconfig create namespace cattle-system
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret generic tls-ca --from-file=cacerts.pem
+
+kubectl --kubeconfig=$kubeconfig -n kube-system create serviceaccount tiller
+kubectl --kubeconfig=$kubeconfig create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+
+helm_version=`helm version |grep Client | awk -F""\" '{print $2}'`
+helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller --tiller-image registry.cn-shanghai.aliyuncs.com/rancher/tiller:$helm_version
+
 ```
 
 - 安装

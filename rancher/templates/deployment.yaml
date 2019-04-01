@@ -50,7 +50,15 @@ spec:
       - image: {{ .Values.rancherRegistry }}/{{ .Values.rancherImage }}:{{ default .Chart.AppVersion .Values.rancherImageTag }}
         name: {{ template "rancher.name" . }}
         ports:
+{{- if eq .Values.service.type "NodePort" }}
+  {{- if ne .Values.tls "external" }}
+        - containerPort: 443
+  {{- else }}
         - containerPort: 80
+  {{- end }}
+{{- else }}
+        - containerPort: 80
+{{- end }}
           protocol: TCP
         args:
 {{- if .Values.debug }}
@@ -80,6 +88,8 @@ spec:
           value: {{ .Values.auditLog.maxBackup | quote }}
         - name: AUDIT_LOG_MAXSIZE
           value: {{ .Values.auditLog.maxSize | quote }}
+        - name: CATTLE_SYSTEM_DEFAULT_REGISTRY
+          value: {{ .Values.rancherRegistry }}
 {{- if .Values.proxy }}
         - name: HTTP_PROXY
           value: {{ .Values.proxy }}
@@ -111,8 +121,9 @@ spec:
 # 如果为私有ssl证书，则需要把CA文件挂载到rancher中
 {{- if .Values.privateCA }}
         # Pass CA cert into rancher for private CA
-        - mountPath: /etc/rancher/ssl
+        - mountPath: /etc/rancher/ssl/cacerts.pem
           name: tls-ca-volume
+          subPath: cacerts.pem
           readOnly: true
 {{- end }}
         - mountPath: /var/log/auditlog
@@ -121,8 +132,14 @@ spec:
 {{- if eq .Values.service.type "NodePort" }}
   # 如果ssl终止不是在外部负载均衡器上，则需要把证书挂载到rancher容器中
   {{- if ne .Values.tls "external" }}
-        - mountPath: /etc/rancher/ssl
+        - mountPath: /etc/rancher/ssl/cert.pem
           name: tls-cert-key-volume
+          subPath: tls.crt
+          readOnly: true
+        - mountPath: /etc/rancher/ssl/key.pem
+          name: tls-cert-key-volume
+          subPath: tls.key
+          readOnly: true
   {{- end }}
 {{- end }}
       # 默认开启审计日志功能
@@ -149,11 +166,6 @@ spec:
         secret:
           defaultMode: 0400
           secretName: tls-rancher-ingress
-          items:
-          - key: tls.crt
-            path: cert.pem
-          - key: tls.key
-            path: key.pem
   {{- end }}
 {{- end }}
 
