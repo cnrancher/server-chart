@@ -31,6 +31,9 @@ git clone -b v2.1.7 https://github.com/xiaoluhong/server-chart.git
 helm install  --kubeconfig=kube_config_xxx.yml \
   --name rancher \
   --namespace cattle-system \
+  --set rancherImage=rancher/rancher \
+  --set rancherRegistry=registry.cn-shanghai.aliyuncs.com \
+  --set busyboxImage=rancher/busybox \
   --set hostname=<修改为自己的域名> \
   --set privateCA=true \
   server-chart/rancher
@@ -65,6 +68,9 @@ git clone -b v2.1.7 https://github.com/xiaoluhong/server-chart.git
 helm install  --kubeconfig=kube_config_xxx.yml \
   --name rancher \
   --namespace cattle-system \
+  --set rancherImage=rancher/rancher \
+  --set rancherRegistry=registry.cn-shanghai.aliyuncs.com \
+  --set busyboxImage=rancher/busybox \
   --set service.type=NodePort \
   --set service.ports.nodePort=30303  \
   --set privateCA=true \
@@ -101,6 +107,9 @@ git clone -b v2.1.7 https://github.com/xiaoluhong/server-chart.git
 helm install  --kubeconfig=kube_config_xxx.yml \
   --name rancher \
   --namespace cattle-system \
+  --set rancherImage=rancher/rancher \
+  --set rancherRegistry=registry.cn-shanghai.aliyuncs.com \
+  --set busyboxImage=rancher/busybox \
   --set service.type=NodePort \
   --set service.ports.nodePort=30303 \
   --set tls=external \
