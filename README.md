@@ -21,6 +21,13 @@ kubeconfig=
 kubectl --kubeconfig=$kubeconfig create namespace cattle-system
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret tls tls-rancher-ingress --cert=./tls.crt --key=./tls.key
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret generic tls-ca --from-file=cacerts.pem
+
+kubectl --kubeconfig=$kubeconfig -n kube-system create serviceaccount tiller
+kubectl --kubeconfig=$kubeconfig create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+
+helm_version=`helm version |grep Client | awk -F""\" '{print $2}'`
+helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller --tiller-image registry.cn-shanghai.aliyuncs.com/rancher/tiller:$helm_version
+
 ```
 
 - 安装
@@ -31,9 +38,11 @@ git clone -b v2.1.7 https://github.com/xiaoluhong/server-chart.git
 helm install  --kubeconfig=kube_config_xxx.yml \
   --name rancher \
   --namespace cattle-system \
+  --set rancherImage=rancher/rancher \
+  --set rancherRegistry=registry.cn-shanghai.aliyuncs.com \
+  --set busyboxImage=rancher/busybox \
   --set hostname=<修改为自己的域名> \
-  --set service.type=ClusterIP \
-  --set ingress.tls.source=secret \
+  --set privateCA=true \
   server-chart/rancher
 ```
 
@@ -41,7 +50,7 @@ helm install  --kubeconfig=kube_config_xxx.yml \
 
 1. 通过`--kubeconfig=`指定kubectl配置文件;
 1. 如果要把外部负载均衡器作为ssl终止，需添加参数: `--set tls=external`;
-1. 如果使用自签名证书，需要设置参数: `--set privateCA=true`;
+1. 如果使用权威ssl证书，则去除`--set privateCA=true`;
 
 ### 2、主机NodePort访问(主机IP+端口)
 
@@ -56,6 +65,13 @@ kubeconfig=
 kubectl --kubeconfig=$kubeconfig create namespace cattle-system
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret tls tls-rancher-ingress --cert=./tls.crt --key=./tls.key
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret generic tls-ca --from-file=cacerts.pem
+
+kubectl --kubeconfig=$kubeconfig -n kube-system create serviceaccount tiller
+kubectl --kubeconfig=$kubeconfig create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+
+helm_version=`helm version |grep Client | awk -F""\" '{print $2}'`
+helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller --tiller-image registry.cn-shanghai.aliyuncs.com/rancher/tiller:$helm_version
+
 ```
 
 - 安装
@@ -66,17 +82,20 @@ git clone -b v2.1.7 https://github.com/xiaoluhong/server-chart.git
 helm install  --kubeconfig=kube_config_xxx.yml \
   --name rancher \
   --namespace cattle-system \
+  --set rancherImage=rancher/rancher \
+  --set rancherRegistry=registry.cn-shanghai.aliyuncs.com \
+  --set busyboxImage=rancher/busybox \
   --set service.type=NodePort \
-  --set ingress.tls.source=secret \
   --set service.ports.nodePort=30303  \
+  --set privateCA=true \
   server-chart/rancher
 ```
 
 >注意:
 
 1. 通过`--kubeconfig=`指定kubectl配置文件;
-1. 如果要把外部负载均衡器作为ssl终止，需添加参数: `--set tls=external`;
-1. 如果使用自签名证书，需要设置参数: `--set privateCA=true`;
+1. 如果使用权威ssl证书，则去除`--set privateCA=true`;
+1. 通过`--set service.ports.nodePort=30303`指定自己想要的端口;
 
 ### 3、外部七层负载均衡器+主机NodePort方式运行(禁用内部ingress转发)
 
@@ -92,6 +111,13 @@ kubeconfig=
 ```
 kubectl --kubeconfig=$kubeconfig create namespace cattle-system
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret generic tls-ca --from-file=cacerts.pem
+
+kubectl --kubeconfig=$kubeconfig -n kube-system create serviceaccount tiller
+kubectl --kubeconfig=$kubeconfig create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+
+helm_version=`helm version |grep Client | awk -F""\" '{print $2}'`
+helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller --tiller-image registry.cn-shanghai.aliyuncs.com/rancher/tiller:$helm_version
+
 ```
 
 - 安装
@@ -102,20 +128,18 @@ git clone -b v2.1.7 https://github.com/xiaoluhong/server-chart.git
 helm install  --kubeconfig=kube_config_xxx.yml \
   --name rancher \
   --namespace cattle-system \
+  --set rancherImage=rancher/rancher \
+  --set rancherRegistry=registry.cn-shanghai.aliyuncs.com \
+  --set busyboxImage=rancher/busybox \
   --set service.type=NodePort \
-  --set tls=external  \
-  --set service.ports.nodePort=30303  \
+  --set service.ports.nodePort=30303 \
+  --set tls=external \
+  --set privateCA=true \
   server-chart/rancher
 ```
 >注意:
 
 1. 通过`--kubeconfig=`指定kubectl配置文件;
-1. 如果使用自签名证书，需要设置参数: `--set privateCA=true`;
+1. 如果使用权威ssl证书，则去除`--set privateCA=true`;
+1. 通过`--set service.ports.nodePort=30303`指定自己想要的端口;
 
-
-## 三、Chart Versioning Notes
-
-```bash
-NAME                      CHART VERSION    APP VERSION    DESCRIPTION
-rancher-stable/rancher    2018.3.1           v2.1.7      Install Rancher Server to manage Kubernetes clusters acro...
-```

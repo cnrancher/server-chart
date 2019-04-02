@@ -2,19 +2,19 @@
 
 # * 为必改项
 # * 服务器FQDN或颁发者名(更换为你自己的域名)
-CN='demo.test.com'
+CN=''
 
 # 扩展信任IP或域名
 
 ## 一般ssl证书只信任域名的访问请求，有时候需要使用ip去访问server，那么需要给ssl证书添加扩展IP，用逗号隔开。
-SSL_IP='172.16.91.145,172.16.155.36'
-SSL_DNS='demo.cnrancher.com,www.rancher.com'
+SSL_IP=''
+SSL_DNS=''
 
 # 国家名(2个字母的代号)
 C=CN
 
 # 证书加密位数
-SSL_SIZE=4096
+SSL_SIZE=2048
 
 # 证书有效期
 DATE=${DATE:-3650}
@@ -59,7 +59,7 @@ if [[ -e ./${CA_CERT} ]]; then
     [[ -z $SILENT ]] && echo "====> Using existing CA Certificate ${CA_CERT}"
 else
     [[ -z $SILENT ]] && echo "====> Generating new CA Certificate ${CA_CERT}"
-    openssl req -x509 -sha256 -new -nodes -key ${CA_KEY} -days ${CA_EXPIRE} -out ${CA_CERT} -subj "/CN=${CA_SUBJECT}" > /dev/null  || exit 1
+    openssl req -x509 -sha256 -new -nodes -key ${CA_KEY} -days ${CA_EXPIRE} -out ${CA_CERT} -subj "/CN=${CA_SUBJECT}" > /dev/null || exit 1
 fi
 
 echo "====> Generating new config file ${SSL_CONFIG}"
@@ -79,7 +79,6 @@ if [[ -n ${SSL_DNS} || -n ${SSL_IP} ]]; then
 subjectAltName = @alt_names
 [alt_names]
 EOM
-
     IFS=","
     dns=(${SSL_DNS})
     dns+=(${SSL_SUBJECT})
@@ -161,21 +160,65 @@ if [[ -n $K8S_SECRET_NAME ]]; then
 fi
 
 echo "4. 重命名服务证书"
-cp ${CN}.key tls.key
-cp ${CN}.crt tls.crt
+mv ${CN}.key tls.key
+mv ${CN}.crt tls.crt
+
 
 # 把生成的证书作为密文导入K8S
 
-## *指定K8S配置文件路径
+## * 指定K8S配置文件路径
 
-kubeconfig=kube_config_cluster.yml
-
-## 执行以下命令删除密文
-
-#kubectl --kubeconfig=$kubeconfig -n cattle-system  delete  secrets  tls-rancher-ingress  tls-ca
+kubeconfig=kube_config_xxx.yml
 
 kubectl --kubeconfig=$kubeconfig create namespace cattle-system
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret tls tls-rancher-ingress --cert=./tls.crt --key=./tls.key
 kubectl --kubeconfig=$kubeconfig -n cattle-system create secret generic tls-ca --from-file=cacerts.pem
 
+kubectl --kubeconfig=$kubeconfig -n kube-system create serviceaccount tiller
+kubectl --kubeconfig=$kubeconfig create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
 
+helm_version=`helm version |grep Client | awk -F""\" '{print $2}'`
+helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller --tiller-image registry.cn-shanghai.aliyuncs.com/rancher/tiller:$helm_version
+
+# 使用内部ingress
+
+#git clone -b v2.1.7 https://github.com/xiaoluhong/server-chart.git
+#helm install --kubeconfig=$kubeconfig \
+#  --name rancher \
+#  --namespace cattle-system \
+#  --set rancherImage=rancher/rancher \
+#  --set rancherRegistry=registry.cn-shanghai.aliyuncs.com \
+#  --set busyboxImage=rancher/busybox \
+#  --set hostname=demo.test.com \
+#  --set privateCA=true \
+#  server-chart/rancher
+#
+#
+# 使用nodeport
+
+#git clone -b v2.1.7 https://github.com/xiaoluhong/server-chart.git
+#helm install  --kubeconfig=$kubeconfig \
+#  --name rancher \
+#  --namespace cattle-system \
+#  --set rancherImage=rancher/rancher \
+#  --set rancherRegistry=registry.cn-shanghai.aliyuncs.com \
+#  --set busyboxImage=rancher/busybox \
+#  --set service.type=NodePort \
+#  --set service.ports.nodePort=30303  \
+#  --set privateCA=true \
+#  server-chart/rancher
+
+# 使用nodeport+外部7层LB
+
+#git clone -b v2.1.7 https://github.com/xiaoluhong/server-chart.git
+#helm install  --kubeconfig=$kubeconfig \
+#  --name rancher \
+#  --namespace cattle-system \
+#  --set rancherImage=rancher/rancher \
+#  --set rancherRegistry=registry.cn-shanghai.aliyuncs.com \
+#  --set busyboxImage=rancher/busybox \
+#  --set service.type=NodePort \
+#  --set service.ports.nodePort=30303 \
+#  --set tls=external \
+#  --set privateCA=true \
+#  server-chart/rancher
