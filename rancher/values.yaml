@@ -45,13 +45,13 @@ imagePullSecrets: []
 ### ingress ###
 # Readme for details and instruction on adding tls secrets.
 ingress:
-  extraAnnotations: 
+  extraAnnotations:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
   tls:
-    # rancher, letsEncrypt, secrets
-    source: rancher
+    # secrets
+    source: secrets
 
 ### LetsEncrypt config ###
 # ProTip: The production environment only allows you to register a name 5 times a week.
@@ -71,7 +71,7 @@ privateCA: false
 noProxy: 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16 
 
 # Override rancher image location for Air Gap installs
-rancherrRegistry: registry.cn-shanghai.aliyuncs.com
+rancherRegistry: registry.cn-shanghai.aliyuncs.com
 rancherImage: rancher/rancher
 # rancher/rancher image tag. https://hub.docker.com/r/rancher/rancher/tags/
 # Defaults to .Chart.appVersion

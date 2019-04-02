@@ -9,21 +9,23 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   ports:
+# 如果类型为NodePort
 {{- if eq .Values.service.type "NodePort" }}
+  ## 如果ssl终止是在外部负载均衡器，则映射80端口
   {{- if eq .Values.tls "external" }}
   - name: http-80
     port: 80
     targetPort: 80
     protocol: TCP
     nodePort: {{ .Values.service.ports.nodePort }}
-  {{- else }}
+  {{- else }} ## 如果ssl终止不是在外部负载均衡器，相应的ssl终止就必须放在rancher上，则映射443端口
   - name: https-443
     port: 443
     targetPort: 443
     protocol: TCP
     nodePort: {{ .Values.service.ports.nodePort }}
   {{- end }}
-{{- else }}
+{{- else }} # 如果类型不是NodePort，则映射80端口
   - name: http-80
     port: 80
     targetPort: 80
