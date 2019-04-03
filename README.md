@@ -1,6 +1,7 @@
 # Rancher Chart
 
 本Chart基于 https://github.com/rancher/server-chart 修改，不支持LetsEncrypt、cert-manager提供证书，需手动通过Secret导入证书(导入方法见脚本结尾), 默认开启审计日志功能.
+
 ## 一、生成自签名证书或重命名权威认证证书
 
 - 仓库根目录有一键创建自签名证书脚本，会自动创建`cacerts.pem`、`tls.key`、`tls.crt`。
@@ -33,7 +34,7 @@ helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller --til
 - 安装
 
 ```bash
-git clone -b v2.1.7 https://github.com/xiaoluhong/server-chart.git
+git clone -b v2.2.1 https://github.com/xiaoluhong/server-chart.git
 
 helm install  --kubeconfig=kube_config_xxx.yml \
   --name rancher \
@@ -49,7 +50,6 @@ helm install  --kubeconfig=kube_config_xxx.yml \
 >注意:
 
 1. 通过`--kubeconfig=`指定kubectl配置文件;
-1. 如果要把外部负载均衡器作为ssl终止，需添加参数: `--set tls=external`;
 1. 如果使用权威ssl证书，则去除`--set privateCA=true`;
 
 ### 2、主机NodePort访问(主机IP+端口)
@@ -77,7 +77,7 @@ helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller --til
 - 安装
 
 ```bash
-git clone -b v2.1.7 https://github.com/xiaoluhong/server-chart.git
+git clone -b v2.2.1 https://github.com/xiaoluhong/server-chart.git
 
 helm install  --kubeconfig=kube_config_xxx.yml \
   --name rancher \
@@ -123,7 +123,7 @@ helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller --til
 - 安装
 
 ```bash
-git clone -b v2.1.7 https://github.com/xiaoluhong/server-chart.git
+git clone -b v2.2.1 https://github.com/xiaoluhong/server-chart.git
 
 helm install  --kubeconfig=kube_config_xxx.yml \
   --name rancher \
