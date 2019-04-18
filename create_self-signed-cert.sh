@@ -1,5 +1,24 @@
 #!/bin/bash -e
 
+help ()
+{
+    echo  ' ================================================================ '
+    echo  ' --domain: 生成ssl证书需要的主域名，如不指定则默认为localhost，如果是ip访问服务，则可忽略；'
+    echo  ' --trusted-ip: 一般ssl证书只信任域名的访问请求，有时候需要使用ip去访问server，那么需要给ssl证书添加扩展IP，多个IP用逗号隔开；'
+    echo  ' --trusted-domain: 如果想多个域名访问，则添加扩展域名（SSL_DNS）,多个SSL_DNS用逗号隔开；'
+    echo  ' --ssl-size: ssl加密位数，默认2048；'
+    echo  ' --ssl-date: ssl有效期，默认10年；'
+    echo  ' --ca-date: ca有效期，默认10年；'
+    echo  ' 使用示例:'
+    echo  ' ./create_self-signed-cert.sh --domain=www.test.com \ '
+    echo  ' --trusted-ip=1.1.1.1,2.2.2.2,3.3.3.3 --ssl-size=2048 --ssl-date=3650'
+    echo  ' ================================================================'
+}
+
+case "$1" in
+    -h|--help) help;exit;;
+esac
+
 CMDOPTS="$*"
 for OPTS in $CMDOPTS;
 do
