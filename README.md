@@ -51,7 +51,7 @@ helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller \
 - 安装
 
 ```bash
-git clone -b v2.2.1 https://github.com/xiaoluhong/server-chart.git;
+git clone -b v2.2.3 https://github.com/xiaoluhong/server-chart.git;
 
 helm install  --kubeconfig=kube_config_xxx.yml \
   --name rancher \
@@ -97,7 +97,7 @@ helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller \
 - 安装
 
 ```bash
-git clone -b v2.2.1 https://github.com/xiaoluhong/server-chart.git
+git clone -b v2.2.3 https://github.com/xiaoluhong/server-chart.git
 
 helm install  --kubeconfig=kube_config_xxx.yml \
   --name rancher \
@@ -146,7 +146,7 @@ helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller \
 - 安装
 
 ```bash
-git clone -b v2.2.1 https://github.com/xiaoluhong/server-chart.git
+git clone -b v2.2.3 https://github.com/xiaoluhong/server-chart.git
 
 helm install  --kubeconfig=kube_config_xxx.yml \
   --name rancher \
