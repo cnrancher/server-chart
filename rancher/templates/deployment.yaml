@@ -47,7 +47,12 @@ spec:
               topologyKey: kubernetes.io/hostname
 {{- end }}
       containers:
-      - image: {{ .Values.rancherRegistry }}/{{ .Values.rancherImage }}:{{ default .Chart.AppVersion .Values.rancherImageTag }}
+    {{- if .Values.privateRegistry }}
+      - image: {{ .Values.registryAddress }}/{{ .Values.rancherImage }}:{{ default .Chart.AppVersion .Values.rancherImageTag }}
+    {{- else }}
+      - image: {{ .Values.rancherImage }}:{{ default .Chart.AppVersion .Values.rancherImageTag }}
+    {{- end }}
+        imagePullPolicy: {{ default "IfNotPresent" .Values.rancherImagePullPolicy }}
         name: {{ template "rancher.name" . }}
         ports:
 {{- if eq .Values.service.type "NodePort" }}
@@ -90,8 +95,10 @@ spec:
         - name: AUDIT_LOG_MAXSIZE
           value: {{ .Values.auditLog.maxSize | quote }}
 {{- end }}
+{{- if .Values.privateRegistry }}
         - name: CATTLE_SYSTEM_DEFAULT_REGISTRY
-          value: {{ .Values.rancherRegistry }}
+          value: {{ .Values.registryAddress }}
+{{- end }}
 {{- if .Values.proxy }}
         - name: HTTP_PROXY
           value: {{ .Values.proxy }}
@@ -148,8 +155,12 @@ spec:
 {{- end }}
 # 默认开启审计日志功能
 {{- if gt .Values.auditLog.level 0.0 }}
-      # Make audit logs avalible for Rancher log collecter tools.
-      - image: {{ .Values.rancherRegistry }}/{{ .Values.busyboxImage }}
+      # Make audit logs available for Rancher log collector tools.
+    {{- if .Values.privateRegistry }}
+      - image: {{ .Values.registryAddress }}/{{ .Values.busyboxImage }}
+    {{- else }}
+      - image: {{ .Values.busyboxImage }}
+    {{- end }}
         name: {{ template "rancher.name" . }}-audit-log
         command: ["tail"]
         args: ["-F", "/var/log/auditlog/rancher-api-audit.log"]
