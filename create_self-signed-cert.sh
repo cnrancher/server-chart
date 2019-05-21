@@ -20,6 +20,11 @@ case "$1" in
     -h|--help) help; exit;;
 esac
 
+if [[ $1 == '' ]];then
+    help;
+    exit;
+fi
+
 CMDOPTS="$*"
 for OPTS in $CMDOPTS;
 do
