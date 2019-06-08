@@ -51,23 +51,28 @@ helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller \
 - 安装
 
 ```bash
-git clone -b v2.2.3 https://github.com/xiaoluhong/server-chart.git;
+git clone -b v2.2.3 https://gitee.com/rancher/server-chart.git
 
-helm install  --kubeconfig=kube_config_xxx.yml \
-  --name rancher \
-  --namespace cattle-system \
-  --set rancherImage=rancher/rancher \
-  --set rancherRegistry=registry.cn-shanghai.aliyuncs.com \
-  --set busyboxImage=rancher/busybox \
-  --set hostname=<修改为自己的域名> \
-  --set privateCA=true \
-  server-chart/rancher;
+kubeconfig=xxx.yml
+helm install --kubeconfig=$kubeconfig \
+    --name rancher \
+    --namespace cattle-system \
+    --set rancherImage=rancher/rancher \
+    --set privateRegistry=true \
+    --set registryAddress=registry.cn-shanghai.aliyuncs.com \
+    --set busyboxImage=rancher/busybox \
+    --set hostname=<修改为自己的域名> \
+    --set privateCA=true \
+    server-chart/rancher
 ```
 
 >注意:
 
 1. 通过`--kubeconfig=`指定kubectl配置文件;
 1. 如果使用权威ssl证书，则去除`--set privateCA=true`;
+1. 如果为离线安装，设置`--set privateRegistry=true`使用私有仓库，再使用`--set registryAddress=`指定离线私有仓库地址，注意不要添加协议头（http或者https）;
+1. 如果镜像名非标准rancher镜像名，可通过`--set rancherImage=`指定镜像名称，不要指定镜像版本，系统会根据chart版本自动获取镜像版本;
+1. 默认自动获取chart版本号作为Rancher镜像版本号，如果想指定镜像版本号，可通过配置`--set rancherImageTag=v2.2.3`来指定;
 
 ### 2、主机NodePort访问(主机IP+端口)
 
@@ -97,13 +102,15 @@ helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller \
 - 安装
 
 ```bash
-git clone -b v2.2.3 https://github.com/xiaoluhong/server-chart.git
+git clone -b v2.2.3 https://gitee.com/rancher/server-chart.git
 
-helm install  --kubeconfig=kube_config_xxx.yml \
+kubeconfig=xxx.yml
+helm install --kubeconfig=$kubeconfig \
   --name rancher \
   --namespace cattle-system \
   --set rancherImage=rancher/rancher \
-  --set rancherRegistry=registry.cn-shanghai.aliyuncs.com \
+  --set privateRegistry=true \
+  --set registryAddress=registry.cn-shanghai.aliyuncs.com \
   --set busyboxImage=rancher/busybox \
   --set service.type=NodePort \
   --set service.ports.nodePort=30303  \
@@ -115,7 +122,9 @@ helm install  --kubeconfig=kube_config_xxx.yml \
 
 1. 通过`--kubeconfig=`指定kubectl配置文件;
 1. 如果使用权威ssl证书，则去除`--set privateCA=true`;
-1. 通过`--set service.ports.nodePort=30303`指定自己想要的端口;
+1. 如果为离线安装，设置`--set privateRegistry=true`使用私有仓库，再使用`--set registryAddress=`指定离线私有仓库地址，注意不要添加协议头（http或者https）;
+1. 如果镜像名非标准rancher镜像名，可通过`--set rancherImage=`指定镜像名称，不要指定镜像版本，系统会根据chart版本自动获取镜像版本;
+1. 默认自动获取chart版本号作为Rancher镜像版本号，如果想指定镜像版本号，可通过配置`--set rancherImageTag=v2.2.3`来指定;
 
 ### 3、外部七层负载均衡器+主机NodePort方式运行(禁用内部ingress转发)
 
@@ -146,23 +155,27 @@ helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller \
 - 安装
 
 ```bash
-git clone -b v2.2.3 https://github.com/xiaoluhong/server-chart.git
+git clone -b v2.2.3 https://gitee.com/rancher/server-chart.git
 
-helm install  --kubeconfig=kube_config_xxx.yml \
-  --name rancher \
-  --namespace cattle-system \
-  --set rancherImage=rancher/rancher \
-  --set rancherRegistry=registry.cn-shanghai.aliyuncs.com \
-  --set busyboxImage=rancher/busybox \
-  --set service.type=NodePort \
-  --set service.ports.nodePort=30303 \
-  --set tls=external \
-  --set privateCA=true \
-  server-chart/rancher
+kubeconfig=xxx.yml
+helm install --kubeconfig=$kubeconfig \
+    --name rancher \
+    --namespace cattle-system \
+    --set rancherImage=rancher/rancher \
+    --set privateRegistry=true \
+    --set registryAddress=registry.cn-shanghai.aliyuncs.com \
+    --set busyboxImage=rancher/busybox \
+    --set service.type=NodePort \
+    --set service.ports.nodePort=30303 \
+    --set tls=external \
+    --set privateCA=true \
+    server-chart/rancher
 ```
 
 >注意:
 
 1. 通过`--kubeconfig=`指定kubectl配置文件;
 1. 如果使用权威ssl证书，则去除`--set privateCA=true`;
-1. 通过`--set service.ports.nodePort=30303`指定自己想要的端口;
+1. 如果为离线安装，设置`--set privateRegistry=true`使用私有仓库，再使用`--set registryAddress=`指定离线私有仓库地址，注意不要添加协议头（http或者https）;
+1. 如果镜像名非标准rancher镜像名，可通过`--set rancherImage=`指定镜像名称，不要指定镜像版本，系统会根据chart版本自动获取镜像版本;
+1. 默认自动获取chart版本号作为Rancher镜像版本号，如果想指定镜像版本号，可通过配置`--set rancherImageTag=v2.2.3`来指定;

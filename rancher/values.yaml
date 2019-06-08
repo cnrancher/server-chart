@@ -24,7 +24,7 @@ auditLog:
 addLocal: "auto"
 
 # Image for collecting rancher audit logs.
-busyboxImage: rancher/busybox
+busyboxImage: library/busybox
 
 # Add debug flag to Rancher server
 debug: false
@@ -70,8 +70,11 @@ privateCA: false
 # comma separated list of domains or ip addresses that will not use the proxy 
 noProxy: 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16 
 
+# 离线部署指定私有镜像仓库
+privateRegistry: false
+registryAddress: registry.cn-shanghai.aliyuncs.com
+
 # Override rancher image location for Air Gap installs
-rancherRegistry: registry.cn-shanghai.aliyuncs.com
 rancherImage: rancher/rancher
 # rancher/rancher image tag. https://hub.docker.com/r/rancher/rancher/tags/
 # Defaults to .Chart.appVersion
