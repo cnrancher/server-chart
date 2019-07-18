@@ -91,8 +91,8 @@ spec:
         - name: AUDIT_LOG_MAXSIZE
           value: {{ .Values.auditLog.maxSize | quote }}
 {{- end }}
-        - name: CATTLE_SYSTEM_DEFAULT_REGISTRY
-          value: {{ .Values.rancherRegistry }}
+#        - name: CATTLE_SYSTEM_DEFAULT_REGISTRY
+#          value: {{ .Values.rancherRegistry }}
 {{- if .Values.proxy }}
         - name: HTTP_PROXY
           value: {{ .Values.proxy }}
