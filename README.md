@@ -68,6 +68,7 @@ helm install  --kubeconfig=kube_config_xxx.yml \
 
 1. 通过`--kubeconfig=`指定kubectl配置文件;
 1. 如果使用权威ssl证书，则去除`--set privateCA=true`;
+1. 默认rancher镜像版本号自动通过chart版本号获取，如果想指定镜像版本号，可通过配置`--set rancherImageTag=xxxx`来指定；
 
 ### 2、主机NodePort访问(主机IP+端口)
 
@@ -116,6 +117,7 @@ helm install  --kubeconfig=kube_config_xxx.yml \
 1. 通过`--kubeconfig=`指定kubectl配置文件;
 1. 如果使用权威ssl证书，则去除`--set privateCA=true`;
 1. 通过`--set service.ports.nodePort=30303`指定自己想要的端口;
+1. 默认rancher镜像版本号自动通过chart版本号获取，如果想指定镜像版本号，可通过配置`--set rancherImageTag=xxxx`来指定；
 
 ### 3、外部七层负载均衡器+主机NodePort方式运行(禁用内部ingress转发)
 
@@ -166,3 +168,4 @@ helm install  --kubeconfig=kube_config_xxx.yml \
 1. 通过`--kubeconfig=`指定kubectl配置文件;
 1. 如果使用权威ssl证书，则去除`--set privateCA=true`;
 1. 通过`--set service.ports.nodePort=30303`指定自己想要的端口;
+1. 默认rancher镜像版本号自动通过chart版本号获取，如果想指定镜像版本号，可通过配置`--set rancherImageTag=xxxx`来指定；
