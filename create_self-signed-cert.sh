@@ -3,7 +3,7 @@
 help ()
 {
     echo  ' ================================================================ '
-    echo  ' --ssl-domain: 生成ssl证书需要的主域名，如不指定则默认为localhost，如果是ip访问服务，则可忽略；'
+    echo  ' --ssl-domain: 生成ssl证书需要的主域名，如不指定则默认为www.rancher.local，如果是ip访问服务，则可忽略；'
     echo  ' --ssl-trusted-ip: 一般ssl证书只信任域名的访问请求，有时候需要使用ip去访问server，那么需要给ssl证书添加扩展IP，多个IP用逗号隔开；'
     echo  ' --ssl-trusted-domain: 如果想多个域名访问，则添加扩展域名（SSL_TRUSTED_DOMAIN）,多个扩展域名用逗号隔开；'
     echo  ' --ssl-size: ssl加密位数，默认2048；'
@@ -45,11 +45,11 @@ done
 CA_DATE=${CA_DATE:-3650}
 CA_KEY=${CA_KEY:-cakey.pem}
 CA_CERT=${CA_CERT:-cacerts.pem}
-CA_DOMAIN=localhost
+CA_DOMAIN=cattle-ca
 
 # ssl相关配置
 SSL_CONFIG=${SSL_CONFIG:-$PWD/openssl.cnf}
-SSL_DOMAIN=${SSL_DOMAIN:-localhost}
+SSL_DOMAIN=${SSL_DOMAIN:-'www.rancher.local'}
 SSL_DATE=${SSL_DATE:-3650}
 SSL_SIZE=${SSL_SIZE:-2048}
 
