@@ -24,6 +24,7 @@ auditLog:
 addLocal: "auto"
 
 # Image for collecting rancher audit logs.
+# Important: update pkg/image/export/main.go when this default image is changed, so that it's reflected accordingly in rancher-images.txt generated for air-gapped setups.
 busyboxImage: library/busybox
 
 # Add debug flag to Rancher server
@@ -31,8 +32,8 @@ debug: false
 
 # Extra environment variables passed to the rancher pods.
 # extraEnv:
-# - name: CATTLE_SYSTEM_DEFAULT_REGISTRY
-#   value: "registry.example.com"
+# - name: CATTLE_TLS_MIN_VERSION
+#   value: "1.0"
 
 # Fully qualified name to reach your Rancher server
 # hostname: rancher.my.org
@@ -52,10 +53,10 @@ ingress:
 
   # configurationSnippet - Add additional Nginx configuration. This example statically sets a header on the ingress.
   # configurationSnippet: |
-  #   more_set_input_headers X-Forwarded-Host {{ .Values.hostname }};
+  #   more_set_input_headers "X-Forwarded-Host: {{ .Values.hostname }}";
 
   tls:
-    # secrets
+    # options: rancher, letsEncrypt, secret
     source: secrets
 
 ### LetsEncrypt config ###
@@ -72,12 +73,8 @@ privateCA: false
 # http[s] proxy server passed into rancher server.
 # proxy: http://<username>@<password>:<url>:<port>
 
-# comma separated list of domains or ip addresses that will not use the proxy 
+# comma separated list of domains or ip addresses that will not use the proxy
 noProxy: 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
-
-# 离线部署指定私有镜像仓库
-privateRegistry: false
-registryAddress: registry.cn-shanghai.aliyuncs.com
 
 # Override rancher image location for Air Gap installs
 rancherImage: rancher/rancher
@@ -107,4 +104,10 @@ service:
   type: ClusterIP
   ports:
     nodePort: 30303
-  
+
+# 离线部署指定私有镜像仓库
+privateRegistry: false
+systemDefaultRegistry: ""
+
+# Set to use the packaged system charts
+useBundledSystemChart: false

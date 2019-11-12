@@ -48,7 +48,7 @@ spec:
 {{- end }}
       containers:
     {{- if .Values.privateRegistry }}
-      - image: {{ .Values.registryAddress }}/{{ .Values.rancherImage }}:{{ default .Chart.AppVersion .Values.rancherImageTag }}
+      - image: {{ .Values.systemDefaultRegistry }}/{{ .Values.rancherImage }}:{{ default .Chart.AppVersion .Values.rancherImageTag }}
     {{- else }}
       - image: {{ .Values.rancherImage }}:{{ default .Chart.AppVersion .Values.rancherImageTag }}
     {{- end }}
@@ -72,6 +72,7 @@ spec:
 # 如果为私有ssl证书，则需要保留CA证书，否则清理生成的CA证书
 {{- if .Values.privateCA }}
         # Private CA - don't clear ca certs
+{{- else if and (eq .Values.tls "ingress") (eq .Values.ingress.tls.source "rancher") }}
         # Rancher self-signed - don't clear ca certs
 {{- else }}
         # Public trusted CA - clear ca certs
@@ -80,6 +81,7 @@ spec:
         - "--http-listen-port=80"
         - "--https-listen-port=443"
         - "--add-local={{ .Values.addLocal }}"
+        - "--log-format=json"
         env:
         - name: CATTLE_NAMESPACE
           value: {{ .Release.Namespace }}
@@ -95,10 +97,6 @@ spec:
         - name: AUDIT_LOG_MAXSIZE
           value: {{ .Values.auditLog.maxSize | quote }}
 {{- end }}
-{{- if .Values.privateRegistry }}
-        - name: CATTLE_SYSTEM_DEFAULT_REGISTRY
-          value: {{ .Values.registryAddress }}
-{{- end }}
 {{- if .Values.proxy }}
         - name: HTTP_PROXY
           value: {{ .Values.proxy }}
@@ -106,6 +104,14 @@ spec:
           value: {{ .Values.proxy }}
         - name: NO_PROXY
           value: {{ .Values.noProxy }}
+{{- end }}
+{{- if .Values.systemDefaultRegistry }}
+        - name: CATTLE_SYSTEM_DEFAULT_REGISTRY
+          value: {{ .Values.systemDefaultRegistry }}
+{{- end }}
+{{- if .Values.useBundledSystemChart }}
+        - name: CATTLE_SYSTEM_CATALOG
+          value: bundled
 {{- end }}
 {{- if .Values.extraEnv }}
 {{ toYaml .Values.extraEnv | indent 8}}
@@ -166,7 +172,7 @@ spec:
 {{- if gt .Values.auditLog.level 0.0 }}
       # Make audit logs available for Rancher log collector tools.
     {{- if .Values.privateRegistry }}
-      - image: {{ .Values.registryAddress }}/{{ .Values.busyboxImage }}
+      - image: {{ .Values.systemDefaultRegistry }}/{{ .Values.busyboxImage }}
     {{- else }}
       - image: {{ .Values.busyboxImage }}
     {{- end }}
