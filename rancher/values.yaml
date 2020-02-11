@@ -93,7 +93,7 @@ replicas: 3
 # Set pod resource requests/limits for Rancher.
 resources: {}
 
-# 
+#
 # tls
 #   Where to offload the TLS/SSL encryption
 # - ingress (default)
@@ -111,3 +111,7 @@ systemDefaultRegistry: ""
 
 # Set to use the packaged system charts
 useBundledSystemChart: false
+
+# Certmanager version compatibility
+certmanager: 
+  version: ""

@@ -12,6 +12,11 @@ spec:
   selector:
     matchLabels:
       app: {{ template "rancher.fullname" . }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -81,6 +86,7 @@ spec:
         - "--http-listen-port=80"
         - "--https-listen-port=443"
         - "--add-local={{ .Values.addLocal }}"
+        - "--log-format=json"
         env:
         - name: CATTLE_NAMESPACE
           value: {{ .Release.Namespace }}
