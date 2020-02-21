@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+DIR_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 help ()
 {
     echo  ' ================================================================ '
@@ -32,8 +34,8 @@ do
     value=$(echo ${OPTS} | awk -F"=" '{print $2}' )
     case "$key" in
         --ssl-domain) SSL_DOMAIN=$value ;;
-        --ssl-trusted-ip) SSL_TRUSTED_IP=$value ;;
         --ssl-trusted-domain) SSL_TRUSTED_DOMAIN=$value ;;
+        --ssl-trusted-ip) SSL_TRUSTED_IP=$value ;;
         --ssl-size) SSL_SIZE=$value ;;
         --ssl-date) SSL_DATE=$value ;;
         --ca-date) CA_DATE=$value ;;
@@ -48,8 +50,8 @@ CA_CERT=${CA_CERT:-cacerts.pem}
 CA_DOMAIN=cattle-ca
 
 # ssl相关配置
-SSL_CONFIG=${SSL_CONFIG:-$PWD/openssl.cnf}
-SSL_DOMAIN=${SSL_DOMAIN:-'www.rancher.local'}
+SSL_CONFIG=${SSL_CONFIG:-$DIR_ROOT/certs/openssl.cnf}
+SSL_DOMAIN=${SSL_DOMAIN:-'rancher.local'}
 SSL_DATE=${SSL_DATE:-3650}
 SSL_SIZE=${SSL_SIZE:-2048}
 
@@ -61,30 +63,54 @@ SSL_CSR=$SSL_DOMAIN.csr
 SSL_CERT=$SSL_DOMAIN.crt
 
 echo -e "\033[32m ---------------------------- \033[0m"
-echo -e "\033[32m       | 生成 SSL Cert |       \033[0m"
+echo -e "\033[32m   |     生成 SSL Cert     |   \033[0m"
 echo -e "\033[32m ---------------------------- \033[0m"
 
-if [[ -e ./${CA_KEY} ]]; then
-    echo -e "\033[32m ====> 1. 发现已存在CA私钥，备份"${CA_KEY}"为"${CA_KEY}"-bak，然后重新创建 \033[0m"
-    mv ${CA_KEY} "${CA_KEY}"-bak
-    openssl genrsa -out ${CA_KEY} ${SSL_SIZE}
+if [[ -d "${DIR_ROOT}/certs" ]]; then
+    echo '发现现有的certs目录，先备份certs目录'
+    mv ${DIR_ROOT}/certs ${DIR_ROOT}/certs-bak-$(date +"%Y%m%d%H%M")
+    mkdir -p ${DIR_ROOT}/certs
 else
-    echo -e "\033[32m ====> 1. 生成新的CA私钥 ${CA_KEY} \033[0m"
-    openssl genrsa -out ${CA_KEY} ${SSL_SIZE}
+    mkdir -p ${DIR_ROOT}/certs
 fi
 
-if [[ -e ./${CA_CERT} ]]; then
-    echo -e "\033[32m ====> 2. 发现已存在CA证书，先备份"${CA_CERT}"为"${CA_CERT}"-bak，然后重新创建 \033[0m"
-    mv ${CA_CERT} "${CA_CERT}"-bak
-    openssl req -x509 -sha256 -new -nodes -key ${CA_KEY} -days ${CA_DATE} -out ${CA_CERT} -subj "/C=${CN}/CN=${CA_DOMAIN}"
+cd ${DIR_ROOT}/certs
+
+if [[ -e '/etc/pki/tls/openssl.cnf' ]]; then
+    cat /etc/pki/tls/openssl.cnf > ${SSL_CONFIG}
+elif [[ -e '/etc/ssl/openssl.cnf' ]]; then
+    cat /etc/ssl/openssl.cnf > ${SSL_CONFIG}
+elif [[ -e '/usr/lib/ssl/openssl.cnf' ]]; then
+    cat /usr/lib/ssl/openssl.cnf > ${SSL_CONFIG}
+elif [[ -e '/usr/local/ssl/openssl.cnf' ]]; then
+    cat /usr/local/ssl/openssl.cnf> ${SSL_CONFIG}
 else
-    echo -e "\033[32m ====> 2. 生成新的CA证书 ${CA_CERT} \033[0m"
-    openssl req -x509 -sha256 -new -nodes -key ${CA_KEY} -days ${CA_DATE} -out ${CA_CERT} -subj "/C=${CN}/CN=${CA_DOMAIN}"
+    echo 'The openssl configuration file was not found.'
 fi
+
+echo "
+[ v3_ca ]
+basicConstraints = critical,CA:TRUE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+" >> ${SSL_CONFIG}
+
+echo -e "\033[32m ====> 1. 生成新的CA私钥 ${CA_KEY} \033[0m"
+openssl genrsa -out ${CA_KEY} ${SSL_SIZE}
+
+echo -e "\033[32m ====> 2. 生成新的CA证书 ${CA_CERT} \033[0m"
+openssl req -x509 -new -nodes -key ${CA_KEY} \
+-days ${SSL_DATE} -out ${CA_CERT} -extensions v3_ca \
+-subj "/CN=${CA_DOMAIN}" -config ${SSL_CONFIG} > /dev/null  || exit 1
 
 echo -e "\033[32m ====> 3. 生成Openssl配置文件 ${SSL_CONFIG} \033[0m"
 cat > ${SSL_CONFIG} <<EOM
+[ v3_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+basicConstraints = CA:true
 [req]
+x509_extensions = v3_ca
 req_extensions = v3_req
 distinguished_name = req_distinguished_name
 [req_distinguished_name]
@@ -92,6 +118,10 @@ distinguished_name = req_distinguished_name
 basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 extendedKeyUsage = clientAuth, serverAuth
+[ v3_ca ]
+basicConstraints = critical,CA:TRUE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer:always
 EOM
 
 if [[ -n ${SSL_TRUSTED_IP} || -n ${SSL_TRUSTED_DOMAIN} ]]; then
@@ -115,16 +145,18 @@ EOM
 fi
 
 echo -e "\033[32m ====> 4. 生成服务SSL KEY ${SSL_KEY} \033[0m"
-openssl genrsa -out ${SSL_KEY} ${SSL_SIZE}
+openssl genrsa -out ${SSL_KEY} ${SSL_SIZE} > /dev/null || exit 1
 
 echo -e "\033[32m ====> 5. 生成服务SSL CSR ${SSL_CSR} \033[0m"
-openssl req -sha256 -new -key ${SSL_KEY} -out ${SSL_CSR} -subj "/C=${CN}/CN=${SSL_DOMAIN}" -config ${SSL_CONFIG}
+openssl req -new -key ${SSL_KEY} -out ${SSL_CSR} \
+    -subj "/CN=${SSL_DOMAIN}" \
+    -config ${SSL_CONFIG} > /dev/null || exit 1
 
 echo -e "\033[32m ====> 6. 生成服务SSL CERT ${SSL_CERT} \033[0m"
-openssl x509 -sha256 -req -in ${SSL_CSR} -CA ${CA_CERT} \
+openssl x509 -req -in ${SSL_CSR} -CA ${CA_CERT} \
     -CAkey ${CA_KEY} -CAcreateserial -out ${SSL_CERT} \
     -days ${SSL_DATE} -extensions v3_req \
-    -extfile ${SSL_CONFIG}
+    -extfile ${SSL_CONFIG} > /dev/null || exit 1
 
 echo -e "\033[32m ====> 7. 证书制作完成 \033[0m"
 echo
@@ -146,7 +178,7 @@ echo "ssl_cert: |"
 cat $SSL_CERT | sed 's/^/  /'
 echo
 
-echo -e "\033[32m ====> 9. 附加CA证书到Cert文件 \033[0m"
+echo -e "\033[32m ====> 9. 合并CA证书到Cert文件 \033[0m"
 cat ${CA_CERT} >> ${SSL_CERT}
 echo "ssl_cert: |"
 cat $SSL_CERT | sed 's/^/  /'
@@ -157,3 +189,6 @@ echo "cp ${SSL_DOMAIN}.key tls.key"
 cp ${SSL_DOMAIN}.key tls.key
 echo "cp ${SSL_DOMAIN}.crt tls.crt"
 cp ${SSL_DOMAIN}.crt tls.crt
+
+cd ${DIR_ROOT}
+ls -all certs
