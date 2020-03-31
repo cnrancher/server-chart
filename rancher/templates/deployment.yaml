@@ -92,7 +92,7 @@ spec:
           value: {{ .Release.Namespace }}
         - name: CATTLE_PEER_SERVICE
           value: {{ template "rancher.fullname" . }}
-{{- if gt .Values.auditLog.level 0.0 }}
+{{- if gt (int .Values.auditLog.level) 0 }}
         - name: AUDIT_LEVEL
           value: {{ .Values.auditLog.level | quote }}
         - name: AUDIT_LOG_MAXAGE
@@ -155,7 +155,7 @@ spec:
           subPath: cacerts.pem
           readOnly: true
 {{- end }}
-{{- if gt .Values.auditLog.level 0.0 }}
+{{- if gt (int .Values.auditLog.level) 0 }}
         - mountPath: /var/log/auditlog
           name: audit-log
 {{- end }}
@@ -174,7 +174,7 @@ spec:
   {{- end }}
 {{- end }}
       # 默认开启审计日志功能
-{{- if gt .Values.auditLog.level 0.0 }}
+{{- if gt (int .Values.auditLog.level) 0 }}
       # Make audit logs available for Rancher log collector tools.
     {{- if .Values.privateRegistry }}
       - image: {{ .Values.systemDefaultRegistry }}/{{ .Values.busyboxImage }}
@@ -214,7 +214,7 @@ spec:
           defaultMode: 0400
           secretName: tls-ca
 {{- end }}
-{{- if gt .Values.auditLog.level 0.0 }}
+{{- if gt (int .Values.auditLog.level) 0 }}
   {{- if eq .Values.auditLog.destination "hostPath" }}
       - name: audit-log
         hostPath:

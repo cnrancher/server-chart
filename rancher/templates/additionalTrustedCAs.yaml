@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  ca-additional.pem: ""
+kind: Secret
+metadata:
+  annotations:
+    field.cattle.io/description: '自定义CA用于校验使用自签名SSL证书的服务'
+  name: tls-ca-additional
+  namespace: cattle-system
+type: Opaque
