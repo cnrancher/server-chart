@@ -117,6 +117,9 @@ spec:
 {{- if .Values.useBundledSystemChart }}
         - name: CATTLE_SYSTEM_CATALOG
           value: bundled
+{{- else }}
+        - name: CATTLE_SYSTEM_CATALOG
+          value: external
 {{- end }}
 {{- if .Values.extraEnv }}
 {{ toYaml .Values.extraEnv | indent 8}}
