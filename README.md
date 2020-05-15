@@ -51,7 +51,7 @@ helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller \
 - 安装
 
 ```bash
-git clone -b v2.2.8 https://gitee.com/rancher/server-chart.git
+git clone -b v2.3.7 https://gitee.com/rancher/server-chart.git
 
 kubeconfig=xxx.yml
 helm install --kubeconfig=$kubeconfig \
@@ -101,7 +101,7 @@ helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller \
 - 安装
 
 ```bash
-git clone -b v2.2.8 https://gitee.com/rancher/server-chart.git
+git clone -b v2.3.7 https://gitee.com/rancher/server-chart.git
 
 kubeconfig=xxx.yml
 helm install --kubeconfig=$kubeconfig \
@@ -153,7 +153,7 @@ helm --kubeconfig=$kubeconfig init --skip-refresh --service-account tiller \
 - 安装
 
 ```bash
-git clone -b v2.2.8 https://gitee.com/rancher/server-chart.git
+git clone -b v2.3.7 https://gitee.com/rancher/server-chart.git
 
 kubeconfig=xxx.yml
 helm install --kubeconfig=$kubeconfig \
