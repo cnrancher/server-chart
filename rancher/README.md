@@ -174,12 +174,10 @@ Specify each parameter using the `--set key=value[,key=value]` argument to `helm
 
 #### Advanced Options
 
-
-
 | Parameter                      | Default Value                                         | Description                                                                                                                                                                                                  |
 | ------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `additionalTrustedCAs`         | false                                                 | ***bool*** - [See Additional Trusted CAs Server](https://rancher.com/docs/rancher/v2.x/en/installation/options/chart-options/#additional-trusted-cas)                                                        |
-| `addLocal`                     | "auto"                                                | ***string*** - Have Rancher detect and import the “local” Rancher server cluster [Import "local Cluster"](https://rancher.com/docs/rancher/v2.x/en/installation/options/chart-options/#import-local-cluster) |
+| `addLocal`                     | "true"                                                | ***string*** - As of Rancher v2.5.0 this flag is deprecated and must be set to "true"|
 | `antiAffinity`                 | "preferred"                                           | ***string*** - AntiAffinity rule for Rancher pods - *"preferred, required"*                                                                                                                                  |
 | `replicas`                     | 3                                                     | ***int*** - Number of replicas of Rancher pods                                                                                                                                                               |
 | `auditLog.destination`         | "sidecar"                                             | ***string*** - Stream to sidecar container console or hostPath volume - *"sidecar, hostPath"*                                                                                                                |
@@ -205,3 +203,9 @@ Specify each parameter using the `--set key=value[,key=value]` argument to `helm
 | `tls`                          | "ingress"                                             | ***string*** - See External TLS Termination for details. - *"ingress, external"*                                                                                                                             |
 | `systemDefaultRegistry`        | ""                                                    | ***string*** - private registry to be used for all system Docker images, e.g., [http://registry.example.com/] *Available as of v2.3.0*                                                                       |
 | `useBundledSystemChart`        | false                                                 | ***bool*** - select to use the system-charts packaged with Rancher server. This option is used for air gapped installations.  *Available as of v2.3.0*                                                       |
+| `customLogos.enabled`          | false                                                 | ***bool*** - Enabled [Rancher custom logos](https://github.com/rancher/ui/tree/master/public/assets/images/logos) persistence volume|
+| `customLogos.volumeKind`       | "persistentVolumeClaim"                               | ***string*** - Use persistentVolumeClaim or configMap for custom logos persistence|
+| `customLogos.volumeName`       | ""                                                    | ***string*** - Use an existing volume. Custom logos should be copied to the volume by the user. Optional for persistentVolumeClaim, required for configMap|
+| `customLogos.storageClass`     | ""                                                    | ***string*** - Set custom logos persistentVolumeClaim storage class. Required for dynamic pv|
+| `customLogos.accessMode`       | "ReadWriteOnce"                                       | ***string*** - Set custom persistentVolumeClaim access mode|
+| `customLogos.size`             | "1Gi"                                                 | ***string*** - Set custom persistentVolumeClaim size|

@@ -19,9 +19,9 @@ spec:
     protocol: TCP
     nodePort: {{ .Values.service.ports.nodePort }}
   {{- else }} ## 如果ssl终止不是在外部负载均衡器，相应的ssl终止就必须放在rancher上，则映射443端口
-  - name: https-443
+  - name: https-internal
     port: 443
-    targetPort: 443
+    targetPort: 444
     protocol: TCP
     nodePort: {{ .Values.service.ports.nodePort }}
   {{- end }}
